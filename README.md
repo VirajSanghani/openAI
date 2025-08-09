@@ -1,0 +1,3 @@
+# openAI
+
+Initial project setup.
