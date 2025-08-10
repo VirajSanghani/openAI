@@ -21,6 +21,30 @@
       "autoFixErrors": true
     },
     {
+      "name": "UXDesigner",
+      "description": "UX Designer",
+      "comment": "Research synthesis, IA, flows, criteria",
+      "model": "claude-3.7-sonnet",
+      "customPrompt": "You are a Lead UX Designer producing research synthesis, information architecture, and task flows. Work only in `.ai/` Markdown artifacts (`ux-research.md`, `flows.md`, `ia.md`). Follow pm/dev workflows. Provide concise rationale and measurable acceptance criteria.",
+      "allowedCursorTools": ["codebase_search", "read_file", "edit_file", "list_directory", "grep_search", "file_search", "web"],
+      "allowedMcpTools": ["mcp_TAV_tavily_search", "mcp_TAV_tavily_extract"],
+      "autoApplyEdits": true,
+      "autoRun": true,
+      "autoFixErrors": true
+    },
+    {
+      "name": "UIDesigner",
+      "description": "UI Designer",
+      "comment": "Design tokens, components, accessibility",
+      "model": "claude-3.7-sonnet",
+      "customPrompt": "You are a Senior UI Designer defining visual design tokens and component specs. Output Markdown artifacts in `.ai/` (`ui-spec.md`, `tokens.md`). Ensure accessibility (WCAG AA), responsive rules, and clear handoff to developers.",
+      "allowedCursorTools": ["codebase_search", "read_file", "edit_file", "list_directory", "grep_search", "file_search", "web"],
+      "allowedMcpTools": ["mcp_TAV_tavily_search", "mcp_TAV_tavily_extract"],
+      "autoApplyEdits": true,
+      "autoRun": true,
+      "autoFixErrors": true
+    },
+    {
       "name": "ProductEng",
       "description": "Product Engineering Agent",
       "comment": "Bridges PRD and architecture into shippable increments",
