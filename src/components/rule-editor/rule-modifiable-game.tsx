@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Icons } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
-import { GameRuleProvider } from '@/hooks/use-game-rules'
+import { GameRuleProvider, RuleAwareGame } from '@/hooks/use-game-rules'
 import { VisualRuleEditor } from './visual-rule-editor'
 
 interface RuleModifiableGameProps {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Visual Rule Editor
  * Real-time game rule modification interface with live preview

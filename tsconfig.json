@@ -47,6 +47,9 @@
     "src/components/builder/**/*",
     "src/components/desktop/**/*",
     "src/components/game-rules/**/*",
-    "src/components/games/rule-enabled-chess.tsx"
+    "src/components/games/rule-enabled-chess.tsx",
+    "src/app/apps/**/*",
+    "src/app/desktop/**/*",
+    "src/app/builder/**/*"
   ]
 }

@@ -47,6 +47,7 @@ import {
   Maximize2,
   Code,
   Eye,
+  Gamepad2,
   ArrowLeft,
   Sparkles,
   type LucideIcon,
@@ -91,7 +92,7 @@ export const Icons = {
   layers: Layers,
   download: Download,
   upload: Upload,
-  github: Github,
+  // prefer custom github icon below
   search: Search,
   externalLink: ExternalLink,
   refresh: RefreshCw,
@@ -107,6 +108,8 @@ export const Icons = {
   maximize2: Maximize2,
   code: Code,
   eye: Eye,
+  alertCircle: AlertCircle,
+  gamepad2: Gamepad2,
   sparkles: Sparkles,
   google: ({ ...props }: React.SVGProps<SVGSVGElement>) => (
     <svg
