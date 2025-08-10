@@ -1,0 +1,642 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MANAGEMENT & AUTH
+// ============================================================================
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  username        String   @unique
+  displayName     String?
+  avatar          String?
+  bio             String?
+  website         String?
+  location        String?
+  isVerified      Boolean  @default(false)
+  isPremium       Boolean  @default(false)
+  isEnterprise    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastActiveAt    DateTime @default(now())
+  
+  // Auth & Security
+  passwordHash    String?
+  emailVerified   DateTime?
+  twoFactorEnabled Boolean @default(false)
+  apiKeys         ApiKey[]
+  sessions        Session[]
+  
+  // Profile & Preferences  
+  preferences     UserPreferences?
+  subscription    Subscription?
+  
+  // Content & Activity
+  apps            App[]
+  templates       Template[]
+  components      Component[]
+  reviews         Review[]
+  comments        Comment[]
+  likes           Like[]
+  follows         Follow[] @relation("UserFollows")
+  followers       Follow[] @relation("UserFollowers")
+  
+  // Collaboration
+  teamMemberships TeamMember[]
+  workspaces      WorkspaceMember[]
+  collaborations  AppCollaborator[]
+  
+  // Analytics & Usage
+  analytics       UserAnalytics[]
+  usageMetrics    UsageMetric[]
+  
+  @@map("users")
+}
+
+model UserPreferences {
+  id               String  @id @default(cuid())
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  theme            String  @default("system") // light, dark, system
+  language         String  @default("en")
+  timezone         String  @default("UTC")
+  notifications    Json    @default("{}")
+  privacy          Json    @default("{}")
+  accessibility    Json    @default("{}")
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@map("user_preferences")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  
+  @@map("sessions")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  keyHash     String    @unique
+  permissions Json      @default("[]")
+  expiresAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  
+  @@map("api_keys")
+}
+
+// ============================================================================
+// SUBSCRIPTION & BILLING
+// ============================================================================
+
+model Subscription {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  plan              String            // free, pro, enterprise
+  status            String            // active, canceled, past_due, etc.
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean          @default(false)
+  
+  // Stripe integration
+  stripeCustomerId     String?         @unique
+  stripeSubscriptionId String?         @unique
+  stripePriceId        String?
+  
+  // Usage & Limits
+  aiCreditsUsed        Int             @default(0)
+  aiCreditsLimit       Int             @default(100)
+  storageUsed          BigInt          @default(0)
+  storageLimit         BigInt          @default(1073741824) // 1GB
+  collaboratorsUsed    Int             @default(0)
+  collaboratorsLimit   Int             @default(3)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("subscriptions")
+}
+
+// ============================================================================
+// APP MANAGEMENT
+// ============================================================================
+
+model App {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  slug            String           @unique
+  icon            String?
+  coverImage      String?
+  
+  // Ownership & Access
+  ownerId         String
+  owner           User             @relation(fields: [ownerId], references: [id])
+  isPublic        Boolean          @default(false)
+  visibility      String           @default("private") // private, public, unlisted
+  
+  // App Metadata
+  category        String?
+  tags            String[]         @default([])
+  version         String           @default("1.0.0")
+  status          String           @default("draft") // draft, published, archived
+  
+  // Technical Details
+  framework       String?          // react, vue, angular, etc.
+  buildTool       String?          // vite, webpack, etc.
+  deploymentUrl   String?
+  repositoryUrl   String?
+  
+  // AI Generation
+  prompt          String?          // Original generation prompt
+  aiModel         String?          // Which AI model generated it
+  generationConfig Json?           // AI generation parameters
+  
+  // Analytics & Metrics
+  views           Int              @default(0)
+  downloads       Int              @default(0)
+  likesCount      Int              @default(0)
+  rating          Float?
+  
+  // Timestamps
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  publishedAt     DateTime?
+  
+  // Relations
+  files           AppFile[]
+  versions        AppVersion[]
+  collaborators   AppCollaborator[]
+  reviews         Review[]
+  comments        Comment[]
+  likes           Like[]
+  analytics       AppAnalytics[]
+  deployments     Deployment[]
+  
+  // Dependencies & Components
+  dependencies    Json             @default("[]")
+  components      AppComponent[]
+  
+  @@map("apps")
+}
+
+model AppFile {
+  id           String   @id @default(cuid())
+  appId        String
+  app          App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  path         String   // relative path within app
+  content      String?  // file content
+  size         Int      @default(0)
+  mimeType     String?
+  
+  // File metadata
+  isDirectory  Boolean  @default(false)
+  parentPath   String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@unique([appId, path])
+  @@map("app_files")
+}
+
+model AppVersion {
+  id              String    @id @default(cuid())
+  appId           String
+  app             App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  version         String
+  changelog       String?
+  isStable        Boolean   @default(false)
+  downloadCount   Int       @default(0)
+  
+  // Version snapshot
+  filesSnapshot   Json      // Complete file structure at this version
+  
+  createdAt       DateTime  @default(now())
+  
+  @@unique([appId, version])
+  @@map("app_versions")
+}
+
+model AppCollaborator {
+  id          String   @id @default(cuid())
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role        String   // owner, editor, viewer
+  permissions Json     @default("[]")
+  
+  invitedAt   DateTime @default(now())
+  acceptedAt  DateTime?
+  
+  @@unique([appId, userId])
+  @@map("app_collaborators")
+}
+
+// ============================================================================
+// COMPONENTS & TEMPLATES
+// ============================================================================
+
+model Component {
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  category        String         // ui, logic, data, etc.
+  
+  // Ownership
+  creatorId       String
+  creator         User           @relation(fields: [creatorId], references: [id])
+  isPublic        Boolean        @default(false)
+  
+  // Component code
+  code            String         // Component implementation
+  props           Json           @default("{}") // PropTypes/TypeScript definitions
+  examples        Json           @default("[]") // Usage examples
+  
+  // Metadata
+  framework       String         // react, vue, angular
+  version         String         @default("1.0.0")
+  tags            String[]       @default([])
+  downloads       Int            @default(0)
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Relations
+  appComponents   AppComponent[]
+  
+  @@map("components")
+}
+
+model AppComponent {
+  id          String    @id @default(cuid())
+  appId       String
+  app         App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+  componentId String
+  component   Component @relation(fields: [componentId], references: [id])
+  
+  // Usage context
+  instanceName String?   // Custom name in this app
+  config       Json      @default("{}") // Component configuration
+  position     Json?     // Visual position in app
+  
+  createdAt   DateTime  @default(now())
+  
+  @@unique([appId, componentId, instanceName])
+  @@map("app_components")
+}
+
+model Template {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  category        String    // starter, ui-kit, full-stack, etc.
+  
+  // Ownership
+  creatorId       String
+  creator         User      @relation(fields: [creatorId], references: [id])
+  isPublic        Boolean   @default(false)
+  isOfficial      Boolean   @default(false)
+  
+  // Template data
+  structure       Json      // File/folder structure
+  dependencies    Json      @default("[]")
+  setupInstructions String?
+  
+  // Metadata  
+  framework       String?
+  difficulty      String    @default("beginner") // beginner, intermediate, advanced
+  tags            String[]  @default([])
+  
+  // Analytics
+  uses            Int       @default(0)
+  rating          Float?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("templates")
+}
+
+// ============================================================================
+// SOCIAL & COMMUNITY
+// ============================================================================
+
+model Review {
+  id        String   @id @default(cuid())
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  rating    Int      // 1-5 stars
+  title     String?
+  content   String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([appId, userId])
+  @@map("reviews")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  content   String
+  parentId  String?  // For nested comments
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("comments")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appId     String
+  app       App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, appId])
+  @@map("likes")
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  follower    User     @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// ============================================================================
+// TEAMS & WORKSPACES
+// ============================================================================
+
+model Team {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  description  String?
+  avatar       String?
+  
+  // Billing
+  plan         String       @default("free")
+  billingEmail String?
+  
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  
+  // Relations
+  members      TeamMember[]
+  workspaces   Workspace[]
+  
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role      String   // owner, admin, member
+  joinedAt  DateTime @default(now())
+  
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model Workspace {
+  id           String            @id @default(cuid())
+  name         String
+  description  String?
+  teamId       String?
+  team         Team?             @relation(fields: [teamId], references: [id])
+  
+  // Access Control
+  visibility   String            @default("private") // private, team, public
+  
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  
+  // Relations
+  members      WorkspaceMember[]
+  
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role        String    // owner, editor, viewer
+  joinedAt    DateTime  @default(now())
+  
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+// ============================================================================
+// DEPLOYMENTS & INFRASTRUCTURE
+// ============================================================================
+
+model Deployment {
+  id              String    @id @default(cuid())
+  appId           String
+  app             App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  // Deployment Info
+  url             String?   // Deployed URL
+  status          String    // building, success, error, queued
+  provider        String    // vercel, netlify, aws, etc.
+  environment     String    @default("production") // production, staging, preview
+  
+  // Build Info
+  buildId         String?   // External build ID
+  buildLogs       String?
+  buildTime       Int?      // Build time in seconds
+  
+  // Version Info
+  commitSha       String?
+  branch          String    @default("main")
+  
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  
+  @@map("deployments")
+}
+
+// ============================================================================
+// ANALYTICS & MONITORING
+// ============================================================================
+
+model AppAnalytics {
+  id              String   @id @default(cuid())
+  appId           String
+  app             App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  
+  // Metrics
+  date            DateTime @db.Date
+  views           Int      @default(0)
+  uniqueViews     Int      @default(0)
+  downloads       Int      @default(0)
+  deployments     Int      @default(0)
+  builds          Int      @default(0)
+  errors          Int      @default(0)
+  
+  // User engagement
+  avgSessionTime  Float?   // Average session time in minutes
+  bounceRate      Float?   // Bounce rate percentage
+  
+  createdAt       DateTime @default(now())
+  
+  @@unique([appId, date])
+  @@map("app_analytics")
+}
+
+model UserAnalytics {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date              DateTime @db.Date
+  sessionsCount     Int      @default(0)
+  timeSpent         Int      @default(0) // Time in minutes
+  appsCreated       Int      @default(0)
+  appsPublished     Int      @default(0)
+  collaborations    Int      @default(0)
+  
+  createdAt         DateTime @default(now())
+  
+  @@unique([userId, date])
+  @@map("user_analytics")
+}
+
+model UsageMetric {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Metric details
+  type       String   // ai_generation, storage, bandwidth, etc.
+  value      Float    // Numeric value
+  unit       String   // tokens, bytes, requests, etc.
+  metadata   Json?    // Additional context
+  
+  timestamp  DateTime @default(now())
+  
+  @@index([userId, type, timestamp])
+  @@map("usage_metrics")
+}
+
+// ============================================================================
+// AI & GENERATION
+// ============================================================================
+
+model AiGeneration {
+  id              String    @id @default(cuid())
+  userId          String
+  
+  // Request details
+  prompt          String
+  type            String    // app, component, template
+  model           String    // gpt-4, claude-3, etc.
+  parameters      Json      @default("{}")
+  
+  // Response
+  status          String    // pending, completed, failed
+  result          Json?     // Generated content
+  tokensUsed      Int?      // Number of tokens consumed
+  processingTime  Int?      // Time in milliseconds
+  
+  // Error handling
+  error           String?   // Error message if failed
+  retryCount      Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  
+  @@map("ai_generations")
+}
+
+// ============================================================================
+// SYSTEM & ADMIN
+// ============================================================================
+
+model SystemConfig {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  value         String
+  type          String   // string, number, boolean, json
+  description   String?
+  
+  updatedAt     DateTime @updatedAt
+  
+  @@map("system_config")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  action        String   // create, update, delete, etc.
+  resource      String   // app, user, team, etc.
+  resourceId    String?
+  details       Json?    // Additional context
+  ipAddress     String?
+  userAgent     String?
+  
+  timestamp     DateTime @default(now())
+  
+  @@index([userId, timestamp])
+  @@index([action, resource])
+  @@map("audit_logs")
+}

@@ -1,0 +1,523 @@
+/* Rule-Enabled Chess Game Styles */
+
+.rule-enabled-chess {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.chess-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Menu Styles */
+.chess-menu {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.chess-menu h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.chess-menu p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.rule-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-size: 0.9rem;
+}
+
+.rule-info p {
+  margin: 5px 0;
+}
+
+.mode-selector {
+  margin: 30px 0;
+}
+
+.mode-selector h3 {
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.mode-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 15px 30px;
+  margin: 0 10px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.mode-btn.active {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.start-btn {
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  border: none;
+  color: white;
+  padding: 18px 40px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #2ecc71, #27ae60);
+}
+
+/* Game Header */
+.chess-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.game-info h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.game-info .white {
+  color: #f8f9fa;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-info .black {
+  color: #2c3e50;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.check-indicator {
+  color: #e74c3c;
+  font-weight: bold;
+  animation: pulse 1s infinite;
+}
+
+.game-over {
+  color: #f39c12;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.game-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.takeback-btn,
+.reset-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.takeback-btn {
+  background: linear-gradient(45deg, #f39c12, #e67e22);
+  color: white;
+}
+
+.takeback-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+}
+
+.reset-btn {
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+.reset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+}
+
+/* Chess Board Styles */
+.chess-board {
+  display: grid;
+  gap: 0;
+  border: 4px solid #2c3e50;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin: 20px 0;
+}
+
+/* Board Themes */
+.chess-board.board-classic {
+  border-color: #8b4513;
+}
+
+.chess-board.board-modern {
+  border-color: #34495e;
+  border-radius: 5px;
+}
+
+.chess-board.board-marble {
+  border-color: #95a5a6;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.chess-board.board-neon {
+  border-color: #00ffff;
+  box-shadow: 0 0 30px #00ffff, 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.chess-board.board-medieval {
+  border-color: #7f8c8d;
+  border-width: 6px;
+  border-style: ridge;
+}
+
+.chess-board.board-space {
+  border-color: #9b59b6;
+  background: radial-gradient(circle, #2c3e50, #000);
+}
+
+/* Chess Squares */
+.chess-square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  min-height: 60px;
+}
+
+/* Classic theme squares */
+.board-classic .chess-square.light {
+  background: #f0d9b5;
+}
+
+.board-classic .chess-square.dark {
+  background: #b58863;
+}
+
+/* Modern theme squares */
+.board-modern .chess-square.light {
+  background: #ecf0f1;
+}
+
+.board-modern .chess-square.dark {
+  background: #34495e;
+}
+
+/* Marble theme squares */
+.board-marble .chess-square.light {
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+}
+
+.board-marble .chess-square.dark {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+}
+
+/* Neon theme squares */
+.board-neon .chess-square.light {
+  background: #000;
+  border: 1px solid #00ffff;
+}
+
+.board-neon .chess-square.dark {
+  background: #001a1a;
+  border: 1px solid #00cccc;
+}
+
+/* Medieval theme squares */
+.board-medieval .chess-square.light {
+  background: linear-gradient(135deg, #d4d4aa, #c9c9a7);
+}
+
+.board-medieval .chess-square.dark {
+  background: linear-gradient(135deg, #8b7d6b, #7f7061);
+}
+
+/* Space theme squares */
+.board-space .chess-square.light {
+  background: radial-gradient(circle, #3f4c6b, #2c3e50);
+}
+
+.board-space .chess-square.dark {
+  background: radial-gradient(circle, #1a1a2e, #16213e);
+}
+
+/* Square interactions */
+.chess-square:hover {
+  box-shadow: inset 0 0 0 3px rgba(52, 152, 219, 0.5);
+}
+
+.chess-square.selected {
+  box-shadow: inset 0 0 0 3px #3498db;
+  background-blend-mode: overlay;
+}
+
+.chess-square.valid-move {
+  box-shadow: inset 0 0 0 3px #27ae60;
+}
+
+.chess-square.valid-move::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: rgba(39, 174, 96, 0.6);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.chess-square.in-check {
+  box-shadow: inset 0 0 0 3px #e74c3c;
+  animation: checkPulse 1s infinite;
+}
+
+@keyframes checkPulse {
+  0% { box-shadow: inset 0 0 0 3px #e74c3c; }
+  50% { box-shadow: inset 0 0 0 6px rgba(231, 76, 60, 0.5); }
+  100% { box-shadow: inset 0 0 0 3px #e74c3c; }
+}
+
+/* Chess Pieces */
+.chess-piece {
+  font-size: 2.5rem;
+  user-select: none;
+  z-index: 2;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Animation speeds */
+.chess-piece.piece-instant {
+  transition: none;
+}
+
+.chess-piece.piece-fast {
+  transition: transform 0.1s ease;
+}
+
+.chess-piece.piece-normal {
+  transition: transform 0.3s ease;
+}
+
+.chess-piece.piece-slow {
+  transition: transform 0.6s ease;
+}
+
+.chess-piece.piece-dramatic {
+  transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Neon theme piece glow */
+.board-neon .chess-piece {
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+}
+
+/* Space theme piece effects */
+.board-space .chess-piece {
+  text-shadow: 0 0 10px #9b59b6, 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Square Coordinates */
+.square-coord {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chess-square.dark .square-coord {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.board-neon .square-coord {
+  color: #00ffff;
+  text-shadow: 0 0 5px #00ffff;
+}
+
+/* Move History */
+.move-history {
+  margin-top: 20px;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.move-history h3 {
+  color: white;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.moves {
+  max-height: 200px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 5px;
+}
+
+.move {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Hints Panel */
+.hints-panel {
+  margin-top: 20px;
+  max-width: 600px;
+  background: rgba(241, 196, 15, 0.1);
+  border: 2px solid rgba(241, 196, 15, 0.3);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.hints-panel h3 {
+  color: #f1c40f;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.hints-panel p {
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chess-game-container {
+    padding: 10px;
+  }
+  
+  .chess-menu {
+    padding: 30px 20px;
+  }
+  
+  .chess-menu h1 {
+    font-size: 2.5rem;
+  }
+  
+  .mode-btn {
+    display: block;
+    margin: 10px 0;
+    width: 200px;
+  }
+  
+  .chess-board {
+    width: 320px !important;
+    height: 320px !important;
+  }
+  
+  .chess-square {
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+  
+  .chess-piece {
+    font-size: 1.8rem;
+  }
+  
+  .chess-game-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .game-controls {
+    justify-content: center;
+  }
+  
+  .move-history {
+    margin: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chess-board {
+    width: 280px !important;
+    height: 280px !important;
+  }
+  
+  .chess-square {
+    min-width: 35px !important;
+    min-height: 35px !important;
+  }
+  
+  .chess-piece {
+    font-size: 1.5rem;
+  }
+  
+  .moves {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}

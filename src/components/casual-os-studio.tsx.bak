@@ -1,0 +1,803 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Sparkles, 
+  Play, 
+  Settings, 
+  User, 
+  Search,
+  Filter,
+  Grid,
+  List,
+  Plus,
+  Star,
+  Download,
+  Share,
+  MoreHorizontal,
+  ChevronDown,
+  Maximize2,
+  Minimize2,
+  Code,
+  Eye,
+  Palette,
+  Layers,
+  Zap,
+  Users,
+  TrendingUp,
+  Clock,
+  Heart,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+
+import { useAppStore } from "@/stores/app-store";
+import { useAuthStore } from "@/stores/auth-store";
+import { cn, getThemeColors, THEME_PALETTES } from "@/lib/utils";
+import type { Theme, Component, App } from "@/types/app";
+
+// Enhanced component system
+interface EnhancedComponent extends Component {
+  icon?: string;
+  category?: string;
+  popularity?: number;
+  lastUsed?: Date;
+}
+
+// Sample enhanced data
+const SAMPLE_APPS: App[] = [
+  {
+    id: "app-1",
+    manifest: {
+      version: "1.0",
+      metadata: {
+        name: "AI Content Summarizer",
+        description: "Transform lengthy documents into crisp, actionable summaries with key insights highlighted.",
+        author: "Alex Rivera",
+        license: "MIT",
+        tags: ["ai", "productivity", "content"],
+        category: "productivity",
+        icon: "📄",
+        screenshots: ["/screenshots/summarizer-1.png"],
+      },
+      inputs: [],
+      outputs: [],
+      components: [],
+      connections: [],
+      layout: { type: "two-column" },
+      theme: { palette: "indigo", radius: 18, blur: 16, density: 12, glass: 0.12 },
+      configuration: { cors: { enabled: false, origins: [] } },
+      requirements: { executionTime: 5000, memory: 128000000, cost: 0.05, storage: 50000000, bandwidth: 100000000, apis: 100 },
+      permissions: { public: true, allowFork: true, allowCommercialUse: false },
+    },
+    owner: {} as any,
+    collaborators: [],
+    visibility: "public",
+    status: "published",
+    version: { major: 1, minor: 2, patch: 0 },
+    versions: [],
+    stats: {
+      views: 15420,
+      installs: 3240,
+      executions: 28500,
+      forks: 180,
+      likes: 890,
+      rating: 4.8,
+      reviews: 124,
+      activeUsers: 1200,
+    },
+    createdAt: new Date("2024-03-15"),
+    updatedAt: new Date("2024-08-01"),
+    publishedAt: new Date("2024-03-20"),
+  },
+  {
+    id: "app-2", 
+    manifest: {
+      version: "1.0",
+      metadata: {
+        name: "Smart Lead Qualifier",
+        description: "Upload your CSV and get intelligent lead scoring with priority recommendations and next actions.",
+        author: "Sarah Chen",
+        license: "Commercial",
+        tags: ["sales", "crm", "analytics"],
+        category: "business",
+        icon: "🎯",
+      },
+      inputs: [],
+      outputs: [],
+      components: [],
+      connections: [],
+      layout: { type: "dashboard" },
+      theme: { palette: "mint", radius: 20, blur: 14, density: 10, glass: 0.10 },
+      configuration: { cors: { enabled: false, origins: [] } },
+      requirements: { executionTime: 10000, memory: 256000000, cost: 0.10, storage: 200000000, bandwidth: 500000000, apis: 500 },
+      permissions: { public: true, allowFork: true, allowCommercialUse: true },
+    },
+    owner: {} as any,
+    collaborators: [],
+    visibility: "public", 
+    status: "published",
+    version: { major: 2, minor: 1, patch: 3 },
+    versions: [],
+    stats: {
+      views: 8930,
+      installs: 1240,
+      executions: 12400,
+      forks: 85,
+      likes: 420,
+      rating: 4.6,
+      reviews: 67,
+      activeUsers: 580,
+    },
+    createdAt: new Date("2024-02-10"),
+    updatedAt: new Date("2024-07-25"),
+    publishedAt: new Date("2024-02-15"),
+  },
+  {
+    id: "app-3",
+    manifest: {
+      version: "1.0", 
+      metadata: {
+        name: "Invoice Manager Pro",
+        description: "Complete invoice management system with automated tracking, reminders, and financial insights.",
+        author: "Marcus Johnson",
+        license: "GPL-3.0",
+        tags: ["finance", "invoicing", "business"],
+        category: "finance",
+        icon: "💰",
+      },
+      inputs: [],
+      outputs: [],
+      components: [],
+      connections: [],
+      layout: { type: "two-column" },
+      theme: { palette: "sunrise", radius: 18, blur: 18, density: 12, glass: 0.14 },
+      configuration: { cors: { enabled: false, origins: [] } },
+      requirements: { executionTime: 3000, memory: 64000000, cost: 0.02, storage: 100000000, bandwidth: 200000000, apis: 200 },
+      permissions: { public: true, allowFork: true, allowCommercialUse: false },
+    },
+    owner: {} as any,
+    collaborators: [],
+    visibility: "public",
+    status: "published", 
+    version: { major: 1, minor: 5, patch: 2 },
+    versions: [],
+    stats: {
+      views: 12350,
+      installs: 2140,
+      executions: 18700,
+      forks: 120,
+      likes: 680,
+      rating: 4.7,
+      reviews: 89,
+      activeUsers: 850,
+    },
+    createdAt: new Date("2024-01-20"),
+    updatedAt: new Date("2024-08-05"),
+    publishedAt: new Date("2024-01-25"),
+  },
+];
+
+// Liquid Background Component
+const LiquidBackground: React.FC = () => {
+  return (
+    <div className="absolute inset-0 -z-10 overflow-hidden">
+      <motion.div
+        className="absolute -top-40 -left-40 h-[40rem] w-[40rem] rounded-full opacity-20 blur-3xl"
+        style={{
+          background: "radial-gradient(circle at 30% 30%, #7C8CF8 0%, transparent 65%)",
+        }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.2, 0.3, 0.2],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute -bottom-40 -right-40 h-[42rem] w-[42rem] rounded-full opacity-20 blur-3xl"
+        style={{
+          background: "radial-gradient(circle at 70% 60%, #6EE7C8 0%, transparent 65%)",
+        }}
+        animate={{
+          scale: [1.2, 1, 1.2],
+          opacity: [0.3, 0.2, 0.3],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[30rem] w-[30rem] rounded-full opacity-10 blur-2xl"
+        style={{
+          background: "radial-gradient(circle, #F6C57B 0%, transparent 60%)",
+        }}
+        animate={{
+          rotate: [0, 360],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      />
+    </div>
+  );
+};
+
+// Enhanced Glass Card Component
+interface GlassCardProps {
+  children: React.ReactNode;
+  className?: string;
+  variant?: "default" | "interactive" | "highlighted";
+  theme?: Theme;
+}
+
+const GlassCard: React.FC<GlassCardProps> = ({ 
+  children, 
+  className = "", 
+  variant = "default",
+  theme
+}) => {
+  const colors = theme ? getThemeColors(theme.palette) : getThemeColors("indigo");
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md transition-all duration-300",
+        variant === "interactive" && "cursor-pointer hover:bg-white/8 hover:border-white/20 hover:-translate-y-1",
+        variant === "highlighted" && "border-primary/30 bg-primary/5",
+        className
+      )}
+      style={{
+        borderRadius: theme?.radius ? `${theme.radius}px` : "18px",
+        backdropFilter: theme?.blur ? `blur(${theme.blur}px)` : "blur(16px)",
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+// Enhanced App Tile Component
+interface AppTileProps {
+  app: App;
+  onPreview: (app: App) => void;
+  onInstall: (app: App) => void;
+  view?: "grid" | "list";
+}
+
+const AppTile: React.FC<AppTileProps> = ({ app, onPreview, onInstall, view = "grid" }) => {
+  const colors = getThemeColors(app.manifest.theme.palette);
+  
+  if (view === "list") {
+    return (
+      <GlassCard variant="interactive" className="p-4">
+        <div className="flex items-center gap-4">
+          <div
+            className="h-12 w-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+            style={{ background: colors.gradient }}
+          >
+            {app.manifest.metadata.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-white/95 truncate">
+                {app.manifest.metadata.name}
+              </h3>
+              <Badge variant="secondary" className="text-xs">
+                v{app.version.major}.{app.version.minor}.{app.version.patch}
+              </Badge>
+            </div>
+            <p className="text-sm text-white/70 line-clamp-1 mb-2">
+              {app.manifest.metadata.description}
+            </p>
+            <div className="flex items-center gap-4 text-xs text-white/60">
+              <span className="flex items-center gap-1">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                {app.stats.rating}
+              </span>
+              <span className="flex items-center gap-1">
+                <Download className="h-3 w-3" />
+                {app.stats.installs.toLocaleString()}
+              </span>
+              <span className="flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                {app.stats.activeUsers.toLocaleString()}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => onPreview(app)}>
+              <Eye className="h-4 w-4" />
+              Preview
+            </Button>
+            <Button size="sm" onClick={() => onInstall(app)}>
+              <Plus className="h-4 w-4" />
+              Install
+            </Button>
+          </div>
+        </div>
+      </GlassCard>
+    );
+  }
+
+  return (
+    <GlassCard variant="interactive" className="p-6">
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className="h-14 w-14 rounded-xl flex items-center justify-center text-3xl"
+          style={{ background: colors.gradient }}
+        >
+          {app.manifest.metadata.icon}
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Share className="h-4 w-4 mr-2" />
+              Share
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Heart className="h-4 w-4 mr-2" />
+              Like
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="font-semibold text-white/95 text-lg">
+            {app.manifest.metadata.name}
+          </h3>
+          <Badge variant="secondary" className="text-xs">
+            v{app.version.major}.{app.version.minor}
+          </Badge>
+        </div>
+        <p className="text-sm text-white/70 line-clamp-2 mb-3">
+          {app.manifest.metadata.description}
+        </p>
+        <div className="flex flex-wrap gap-1 mb-3">
+          {app.manifest.metadata.tags.slice(0, 3).map((tag, i) => (
+            <Badge key={i} variant="outline" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-xs text-white/60 mb-4">
+        <span className="flex items-center gap-1">
+          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+          {app.stats.rating} ({app.stats.reviews})
+        </span>
+        <span className="flex items-center gap-1">
+          <Download className="h-3 w-3" />
+          {app.stats.installs.toLocaleString()}
+        </span>
+        <span className="flex items-center gap-1">
+          <TrendingUp className="h-3 w-3" />
+          {app.stats.activeUsers.toLocaleString()}
+        </span>
+      </div>
+
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => onPreview(app)} className="flex-1">
+          <Eye className="h-4 w-4 mr-2" />
+          Preview
+        </Button>
+        <Button size="sm" onClick={() => onInstall(app)} className="flex-1">
+          <Plus className="h-4 w-4 mr-2" />
+          Install
+        </Button>
+      </div>
+    </GlassCard>
+  );
+};
+
+// Main Studio Component
+const CasualOSStudio: React.FC = () => {
+  // State
+  const [activeTab, setActiveTab] = useState<"marketplace" | "builder" | "apps" | "analytics">("marketplace");
+  const [selectedApp, setSelectedApp] = useState<App | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [prompt, setPrompt] = useState("");
+  
+  // Store hooks
+  const { user } = useAuthStore();
+  const { 
+    currentApp, 
+    isGenerating, 
+    generationProgress,
+    createApp,
+    loadApp 
+  } = useAppStore();
+
+  // Filtered apps based on search
+  const filteredApps = useMemo(() => {
+    return SAMPLE_APPS.filter(app =>
+      app.manifest.metadata.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.manifest.metadata.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.manifest.metadata.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [searchQuery]);
+
+  // Handlers
+  const handlePreviewApp = (app: App) => {
+    setSelectedApp(app);
+  };
+
+  const handleInstallApp = (app: App) => {
+    // Mock installation
+    console.log("Installing app:", app.manifest.metadata.name);
+  };
+
+  const handleCreateApp = async () => {
+    if (!prompt.trim()) return;
+    
+    try {
+      await createApp({ prompt });
+      setActiveTab("builder");
+      setPrompt("");
+    } catch (error) {
+      console.error("Failed to create app:", error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-[#0B0C12] text-white relative overflow-hidden">
+      <LiquidBackground />
+
+      {/* Enhanced Header */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0B0C12]/80 backdrop-blur-md">
+        <div className="flex items-center justify-between px-6 py-4">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-4">
+            <motion.div 
+              className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-primary-mint to-primary-sunrise flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Sparkles className="h-5 w-5 text-white" />
+            </motion.div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Casual OS</h1>
+              <p className="text-xs text-white/60">AI-Powered App Studio</p>
+            </div>
+            <Badge variant="outline" className="ml-2">
+              Beta
+            </Badge>
+          </div>
+
+          {/* Navigation */}
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="flex-1 max-w-md mx-8">
+            <TabsList className="grid w-full grid-cols-4 bg-white/5 border border-white/10">
+              <TabsTrigger value="marketplace" className="text-xs">Marketplace</TabsTrigger>
+              <TabsTrigger value="builder" className="text-xs">Builder</TabsTrigger>
+              <TabsTrigger value="apps" className="text-xs">My Apps</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {/* User Actions */}
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <Button variant="glass" size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New App
+                </Button>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.profile.avatar} />
+                  <AvatarFallback>{user.profile.displayName?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+                <Button size="sm">
+                  Get Started
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative">
+        <Tabs value={activeTab} className="w-full">
+          {/* Marketplace Tab */}
+          <TabsContent value="marketplace" className="m-0">
+            <div className="grid grid-cols-12 gap-6 p-6">
+              {/* Sidebar */}
+              <div className="col-span-3">
+                <div className="sticky top-24 space-y-6">
+                  {/* Search & Filters */}
+                  <GlassCard className="p-4">
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Search apps..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        leftIcon={<Search className="h-4 w-4" />}
+                        variant="glass"
+                      />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-white/70">View</span>
+                        <div className="flex gap-1">
+                          <Button
+                            variant={viewMode === "grid" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setViewMode("grid")}
+                          >
+                            <Grid className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant={viewMode === "list" ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setViewMode("list")}
+                          >
+                            <List className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </GlassCard>
+
+                  {/* Stats Card */}
+                  <GlassCard className="p-4">
+                    <h3 className="font-semibold mb-3">Marketplace Stats</h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-white/70">Total Apps</span>
+                        <span className="font-medium">12,450</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-white/70">Active Users</span>
+                        <span className="font-medium">89,320</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-white/70">Executions Today</span>
+                        <span className="font-medium">2.4M</span>
+                      </div>
+                    </div>
+                  </GlassCard>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="col-span-9">
+                <div className="space-y-6">
+                  {/* Hero Section */}
+                  <GlassCard className="p-8 text-center">
+                    <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary via-primary-mint to-primary-sunrise bg-clip-text text-transparent">
+                      Build Anything with AI
+                    </h2>
+                    <p className="text-white/70 text-lg mb-6 max-w-2xl mx-auto">
+                      Describe your app idea in plain English and watch our AI create a fully functional application in minutes.
+                    </p>
+                    <div className="flex gap-3 max-w-md mx-auto">
+                      <Input
+                        placeholder="I want to build an app that..."
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        variant="glass"
+                        className="flex-1"
+                      />
+                      <Button 
+                        onClick={handleCreateApp}
+                        disabled={!prompt.trim() || isGenerating}
+                        loading={isGenerating}
+                      >
+                        {isGenerating ? "Creating..." : "Create"}
+                      </Button>
+                    </div>
+                    {isGenerating && (
+                      <div className="mt-4">
+                        <Progress value={generationProgress} className="max-w-md mx-auto" />
+                        <p className="text-sm text-white/60 mt-2">
+                          Generating your app... {generationProgress}%
+                        </p>
+                      </div>
+                    )}
+                  </GlassCard>
+
+                  {/* Apps Grid */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold">Featured Apps</h3>
+                      <span className="text-sm text-white/60">
+                        {filteredApps.length} apps found
+                      </span>
+                    </div>
+                    <div className={cn(
+                      viewMode === "grid" 
+                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        : "space-y-4"
+                    )}>
+                      {filteredApps.map((app) => (
+                        <AppTile
+                          key={app.id}
+                          app={app}
+                          onPreview={handlePreviewApp}
+                          onInstall={handleInstallApp}
+                          view={viewMode}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Builder Tab */}
+          <TabsContent value="builder" className="m-0">
+            <div className="p-6">
+              <GlassCard className="p-8 text-center">
+                <Code className="h-16 w-16 mx-auto mb-4 text-primary" />
+                <h2 className="text-2xl font-bold mb-4">AI App Builder</h2>
+                <p className="text-white/70 mb-6 max-w-md mx-auto">
+                  The enhanced visual builder is coming soon. Create apps with natural language for now!
+                </p>
+                <Button onClick={() => setActiveTab("marketplace")}>
+                  Go to Marketplace
+                </Button>
+              </GlassCard>
+            </div>
+          </TabsContent>
+
+          {/* My Apps Tab */}
+          <TabsContent value="apps" className="m-0">
+            <div className="p-6">
+              <GlassCard className="p-8 text-center">
+                <Layers className="h-16 w-16 mx-auto mb-4 text-primary" />
+                <h2 className="text-2xl font-bold mb-4">Your Apps</h2>
+                <p className="text-white/70 mb-6 max-w-md mx-auto">
+                  Manage and monitor your created applications.
+                </p>
+                {user ? (
+                  <div className="text-center">
+                    <p className="text-white/60 mb-4">No apps created yet</p>
+                    <Button onClick={() => setActiveTab("marketplace")}>
+                      Create Your First App
+                    </Button>
+                  </div>
+                ) : (
+                  <Button>
+                    Sign In to View Your Apps
+                  </Button>
+                )}
+              </GlassCard>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="m-0">
+            <div className="p-6">
+              <GlassCard className="p-8 text-center">
+                <TrendingUp className="h-16 w-16 mx-auto mb-4 text-primary" />
+                <h2 className="text-2xl font-bold mb-4">Analytics Dashboard</h2>
+                <p className="text-white/70 mb-6 max-w-md mx-auto">
+                  Track performance and usage metrics for your applications.
+                </p>
+                <Button variant="outline">
+                  Coming Soon
+                </Button>
+              </GlassCard>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* App Preview Modal */}
+      <AnimatePresence>
+        {selectedApp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setSelectedApp(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-4xl max-h-[90vh] overflow-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GlassCard className="p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="h-16 w-16 rounded-xl flex items-center justify-center text-4xl"
+                      style={{ 
+                        background: getThemeColors(selectedApp.manifest.theme.palette).gradient 
+                      }}
+                    >
+                      {selectedApp.manifest.metadata.icon}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{selectedApp.manifest.metadata.name}</h2>
+                      <p className="text-white/70">{selectedApp.manifest.metadata.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
+                        <span>by {selectedApp.manifest.metadata.author}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          {selectedApp.stats.rating} ({selectedApp.stats.reviews} reviews)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Share className="h-4 w-4 mr-2" />
+                      Share
+                    </Button>
+                    <Button size="sm" onClick={() => handleInstallApp(selectedApp)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Install
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setSelectedApp(null)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Preview Content */}
+                <div className="border border-white/10 rounded-xl p-6 bg-white/5">
+                  <div className="text-center py-12">
+                    <Play className="h-12 w-12 mx-auto mb-4 text-white/40" />
+                    <p className="text-white/60">Interactive preview coming soon</p>
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default CasualOSStudio;
