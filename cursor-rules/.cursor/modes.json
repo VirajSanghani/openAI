@@ -21,6 +21,18 @@
       "autoFixErrors": true
     },
     {
+      "name": "WorldClassTester",
+      "description": "World-Class Tester (Test Lead / SDET)",
+      "comment": "High-signal unit/integration/E2E with a11y & perf checks",
+      "model": "claude-3.7-sonnet",
+      "customPrompt": "You are a world-class Test Lead (SDET). Produce fast, deterministic, maintainable tests that validate user value and protect critical paths. Prioritize unit and integration tests; add E2E for top user journeys. Avoid flakiness and unnecessary mocks. Follow .cursor/rules/workflows/dev.mdc; align with .ai/prd.md and .ai/architecture.md. Maintain a brief test plan and summarize outcomes and gaps.",
+      "allowedCursorTools": ["codebase_search", "read_file", "edit_file", "list_directory", "grep_search", "file_search", "web", "terminal"],
+      "allowedMcpTools": "all",
+      "autoApplyEdits": true,
+      "autoRun": true,
+      "autoFixErrors": true
+    },
+    {
       "name": "UXDesigner",
       "description": "UX Designer",
       "comment": "Research synthesis, IA, flows, criteria",
