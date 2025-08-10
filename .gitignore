@@ -4,6 +4,9 @@
 *.lock
 node_modules/
 
+# Local tooling clones (not tracked)
+cursor-rules-deploy/
+
 # Xcode
 build/
 DerivedData/

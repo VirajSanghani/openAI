@@ -21,6 +21,18 @@
       "autoFixErrors": true
     },
     {
+      "name": "ProductEng",
+      "description": "Product Engineering Agent",
+      "comment": "Bridges PRD and architecture into shippable increments",
+      "model": "claude-3.7-sonnet",
+      "customPrompt": "You are a Senior Product Engineer turning PRDs into shippable increments. Follow .cursor/rules/workflows/dev.mdc strictly. Work in small, high-signal steps with guard clauses, clear names, and explicit types. Keep diffs narrowly scoped. Maintain a short plan, run build/tests after substantive edits, and summarize outcomes and next steps succinctly. Primary references: .ai/prd.md, .ai/*story.md, .ai/architecture.md.",
+      "allowedCursorTools": "all",
+      "allowedMcpTools": "all",
+      "autoApplyEdits": true,
+      "autoRun": true,
+      "autoFixErrors": true
+    },
+    {
       "name": "Arch",
       "description": "Solutions Architect",
       "comment": "Architect Agent - Creates and maintains architecture documents",
